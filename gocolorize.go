@@ -1,4 +1,4 @@
-package colorize
+package gocolorize
 
 import "strings"
 
