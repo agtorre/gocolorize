@@ -5,6 +5,7 @@ Gocolorize is a package that allows Go programs to provide ANSI coloring in eith
 
 ##Features
 - Stateful and Stateless ANSI coloring 
+- Foreground and Background colors
 - Tests w/ 100% coverage
 - Working examples
 
