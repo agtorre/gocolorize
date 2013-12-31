@@ -5,6 +5,7 @@ import "strings"
 //A list of the basic unix shell colors
 type Color string
 const (
+    COLOR_NONE Color = ""
     COLOR_RESET Color = "\033[0m"
     COLOR_BOLD Color = "\033[1m"
     COLOR_BLACK Color = "\033[0;30m"
@@ -36,6 +37,7 @@ const (
     COLOR_BG_BLUE BgColor = "\033[44m"
     COLOR_BG_MAGENTA BgColor = "\033[45m"
     COLOR_BG_CYAN BgColor = "\033[46m"
+    COLOR_BG_WHITE BgColor = "\033[47m"
 
 )
 
@@ -44,6 +46,13 @@ type bold bool
 type Colorize struct{
     Color
     BgColor
+}
+
+func New(c Color, b BgColor) Colorize{
+    var result Colorize
+    result.SetColor(c)
+    result.SetBgColor(b)
+    return result
 }
 
 func (C *Colorize) SetColor(c Color){
