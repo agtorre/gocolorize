@@ -28,5 +28,5 @@ See examples directory for examples
 Tests are another good place to see examples. In order to run tests:
 
     $ go test -cover
-    $ cd paints
+    $ cd paints/
     $ go test -cover
