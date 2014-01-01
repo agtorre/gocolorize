@@ -1,103 +1,100 @@
 package gocolorize
 
-import "strings"
+import (
+	"bytes"
+	"fmt"
+)
 
 //A list of the basic unix shell colors
-type Color string
+const reset = "\033[0m"
+
+type FgColor string
 
 const (
-	COLOR_NONE    Color = ""
-	COLOR_RESET   Color = "\033[0m"
-	COLOR_BOLD    Color = "\033[1m"
-	COLOR_BLACK   Color = "\033[0;30m"
-	COLOR_RED     Color = "\033[0;31m"
-	COLOR_GREEN   Color = "\033[0;32m"
-	COLOR_YELLOW  Color = "\033[0;33m"
-	COLOR_BLUE    Color = "\033[0;34m"
-	COLOR_MAGENTA Color = "\033[0;35m"
-	COLOR_CYAN    Color = "\033[0;36m"
-
-	COLOR_LIGHT_GRAY Color = "\033[0;37m"
-	COLOR_GRAY       Color = "\033[1;30m"
-
-	COLOR_BOLD_RED     Color = "\033[1;31m"
-	COLOR_BOLD_GREEN   Color = "\033[1;32m"
-	COLOR_BOLD_YELLOW  Color = "\033[1;33m"
-	COLOR_BOLD_BLUE    Color = "\033[1;34m"
-	COLOR_BOLD_MAGENTA Color = "\033[1;35m"
-	COLOR_BOLD_CYAN    Color = "\033[1;36m"
-	COLOR_WHITE        Color = "\033[1;37m"
+	FgNone        FgColor = ""
+	FgBold        FgColor = "\033[1m"
+	FgBlack       FgColor = "\033[0;30m"
+	FgRed         FgColor = "\033[0;31m"
+	FgGreen       FgColor = "\033[0;32m"
+	FgYellow      FgColor = "\033[0;33m"
+	FgBlue        FgColor = "\033[0;34m"
+	FgMagenta     FgColor = "\033[0;35m"
+	FgCyan        FgColor = "\033[0;36m"
+	FgLightGray   FgColor = "\033[0;37m"
+	FgGray        FgColor = "\033[1;30m"
+	FgBoldRed     FgColor = "\033[1;31m"
+	FgBoldGreen   FgColor = "\033[1;32m"
+	FgBoldYellow  FgColor = "\033[1;33m"
+	FgBoldBlue    FgColor = "\033[1;34m"
+	FgBoldMagenta FgColor = "\033[1;35m"
+	FgBoldCyan    FgColor = "\033[1;36m"
+	FgWhite       FgColor = "\033[1;37m"
 )
 
 type BgColor string
 
 const (
-	COLOR_BG_NONE    BgColor = ""
-	COLOR_BG_RED     BgColor = "\033[41m"
-	COLOR_BG_GREEN   BgColor = "\033[42m"
-	COLOR_BG_YELLOW  BgColor = "\033[43m"
-	COLOR_BG_BLUE    BgColor = "\033[44m"
-	COLOR_BG_MAGENTA BgColor = "\033[45m"
-	COLOR_BG_CYAN    BgColor = "\033[46m"
-	COLOR_BG_WHITE   BgColor = "\033[47m"
+	BgNone    BgColor = ""
+	BgBlack   BgColor = "\033[40m"
+	BgRed     BgColor = "\033[41m"
+	BgGreen   BgColor = "\033[42m"
+	BgYellow  BgColor = "\033[43m"
+	BgBlue    BgColor = "\033[44m"
+	BgMagenta BgColor = "\033[45m"
+	BgCyan    BgColor = "\033[46m"
+	BgWhite   BgColor = "\033[47m"
 )
 
 type Colorize struct {
-	Color
+	Value []interface{}
+	FgColor
 	BgColor
 }
 
-func New(c Color, b BgColor) Colorize {
-	var result Colorize
-	result.SetColor(c)
-	result.SetBgColor(b)
-	return result
+func (c Colorize) Paint(v ...interface{}) Colorize {
+	return Colorize{Value: v, FgColor: c.FgColor, BgColor: c.BgColor}
 }
 
-func (C *Colorize) SetColor(c Color) {
-	C.Color = c
+func (c Colorize) PaintString(v ...interface{}) string {
+	r := Colorize{Value: v, FgColor: c.FgColor, BgColor: c.BgColor}
+	return fmt.Sprint(r)
+}
+
+// Format allows ColorText to satisfy the fmt.Formatter interface. The format
+// behaviour is the same as for fmt.Print.
+func (ct Colorize) Format(fs fmt.State, c rune) {
+	fmt.Fprint(fs, ct.FgColor)
+	fmt.Fprint(fs, ct.BgColor)
+	w, wOk := fs.Width()
+	p, pOk := fs.Precision()
+	var b bytes.Buffer
+	for i, _ := range ct.Value {
+		b.WriteByte('%')
+		for _, f := range "+-# 0" {
+			if fs.Flag(int(f)) {
+				b.WriteRune(f)
+			}
+		}
+		if wOk {
+			fmt.Fprint(&b, w)
+		}
+		if pOk {
+			b.WriteByte('.')
+			fmt.Fprint(&b, p)
+		}
+		b.WriteRune(c)
+		if i < len(ct.Value)-1 {
+			b.WriteByte(' ')
+		}
+	}
+	fmt.Fprintf(fs, b.String(), ct.Value...)
+	fmt.Fprint(fs, reset)
+}
+
+func (C *Colorize) SetColor(c FgColor) {
+	C.FgColor = c
 }
 
 func (C *Colorize) SetBgColor(b BgColor) {
 	C.BgColor = b
-}
-
-func (C *Colorize) Fmt(val string) string {
-	var s []string
-	s = append(s, string(C.Color))
-	if C.BgColor != COLOR_BG_NONE {
-		s = append(s, string(C.BgColor))
-	}
-	s = append(s, val)
-	s = append(s, string(COLOR_RESET))
-
-	result := strings.Join(s, "")
-	return result
-}
-
-func (C *Colorize) FmtColor(val string, c Color) string {
-	var orig_color = C.Color
-	C.Color = c
-	result := C.Fmt(val)
-	C.Color = orig_color
-	return result
-}
-
-func (C *Colorize) FmtBgColor(val string, b BgColor) string {
-	var orig_bg_color = C.BgColor
-	C.BgColor = b
-	result := C.Fmt(val)
-	C.BgColor = orig_bg_color
-	return result
-}
-
-func (C *Colorize) FmtColorAndBgColor(val string, c Color, b BgColor) string {
-	var orig_color = C.Color
-	var orig_bg_color = C.BgColor
-	C.Color = c
-	C.BgColor = b
-	result := C.Fmt(val)
-	C.Color = orig_color
-	C.BgColor = orig_bg_color
-	return result
 }

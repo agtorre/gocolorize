@@ -15,10 +15,10 @@ func TestStatefulColor(t *testing.T) {
 	var red, blue Colorize
 
 	//set some state
-	red.SetColor(COLOR_RED)
-	blue.SetColor(COLOR_BLUE)
+	red.SetColor(FgRed)
+	blue.SetColor(FgBlue)
 
-	out_string := fmt.Sprintf("This %s a %s", red.Fmt("is"), blue.Fmt("test"))
+	out_string := fmt.Sprintf("This %s a %s", red.Paint("is"), blue.Paint("test"))
 	basis_string := "This \033[0;31mis\033[0m a \033[0;34mtest\033[0m"
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
@@ -31,10 +31,10 @@ func TestStatefulBGColor(t *testing.T) {
 	var white_red_bg Colorize
 
 	//set color and background
-	white_red_bg.SetColor(COLOR_WHITE)
-	white_red_bg.SetBgColor(COLOR_BG_RED)
+	white_red_bg.SetColor(FgWhite)
+	white_red_bg.SetBgColor(BgRed)
 
-	out_string := fmt.Sprintf(white_red_bg.Fmt("Now with backgrounds!"))
+	out_string := fmt.Sprint(white_red_bg.Paint("Now with backgrounds!"))
 	basis_string := "\033[1;37m\033[41mNow with backgrounds!\033[0m"
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
@@ -43,11 +43,10 @@ func TestStatefulBGColor(t *testing.T) {
 	}
 }
 
-func TestStatelessColor(t *testing.T) {
-	var generic Colorize
-
-	out_string := fmt.Sprintf(generic.FmtColor("on the fly", COLOR_GREEN))
-	basis_string := "\033[0;32mon the fly\033[0m"
+func TestStatefulMultipleInterface(t *testing.T) {
+	blue := Colorize{FgColor: FgBlue}
+	out_string := fmt.Sprint(blue.Paint("Multiple types of args:", 1, 1.24))
+	basis_string := "\033[0;34mMultiple types of args: 1 1.24\033[0m"
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
 	} else {
@@ -55,12 +54,17 @@ func TestStatelessColor(t *testing.T) {
 	}
 }
 
-func TestStatelessBackground(t *testing.T) {
-	var generic Colorize
-
-	out_string := fmt.Sprintf(generic.FmtBgColor("Yellow Background", COLOR_BG_YELLOW))
-	basis_string := "\033[43mYellow Background\033[0m"
-
+func TestStatefulComplexType(t *testing.T) {
+	green := Colorize{BgColor: BgGreen}
+	out_string := fmt.Sprint(green.Paint(
+		struct {
+			int
+			string
+		}{}))
+	basis_string := fmt.Sprintf("\033[42m%v\033[0m", struct {
+		int
+		string
+	}{})
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
 	} else {
@@ -68,24 +72,11 @@ func TestStatelessBackground(t *testing.T) {
 	}
 }
 
-func TestStatelessColorAndBackground(t *testing.T) {
-	var generic Colorize
+func TestInitialize(t *testing.T) {
+	black_on_white := Colorize{FgColor: FgBlack, BgColor: BgWhite}
+	f := black_on_white.Paint
 
-	out_string := fmt.Sprintf(generic.FmtColorAndBgColor("Cyan on Magenta??", COLOR_CYAN, COLOR_BG_MAGENTA))
-	basis_string := "\033[0;36m\033[45mCyan on Magenta??\033[0m"
-
-	if out_string != basis_string {
-		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
-	} else {
-		fmt.Printf("Success: string: '%s' matches '%s'\n", out_string, basis_string)
-	}
-}
-
-func TestNew(t *testing.T) {
-	black_on_white := New(COLOR_BLACK, COLOR_BG_WHITE)
-	f := black_on_white.Fmt
-
-	out_string := fmt.Sprintf(f("Now this is cool"))
+	out_string := fmt.Sprint(f("Now this is cool"))
 	basis_string := "\033[0;30m\033[47mNow this is cool\033[0m"
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
