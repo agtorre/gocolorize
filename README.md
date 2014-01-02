@@ -1,5 +1,5 @@
 #Gocolorize
-Gocolorize is a package that allows Go programs to provide ANSI coloring in either a stateful manner. Gocolorize is ideal for logging or cli applications.
+Gocolorize is a package that allows Go programs to provide ANSI coloring in a stateful manner. Gocolorize is ideal for logging or cli applications.
 
 ![colored tests passing](https://raw.github.com/agtorre/gocolorize/master/screenshot/tests.png)
 
