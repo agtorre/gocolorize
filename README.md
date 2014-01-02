@@ -110,6 +110,15 @@ See examples directory for examples:
 Tests are another good place to see examples. In order to run tests:
 
     $ go test -cover
+
+##Portability
+ANSI coloring will not work in default Windows environments and may not work in other environments correctly. In order to allow compatibility with these environments, you can call:
+
+```go
+gocolorize.TogglePlain()
+```
+
+Once toggled, the library will still function, but it will not color the output.
     
 ## References
 
