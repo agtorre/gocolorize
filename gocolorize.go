@@ -1,100 +1,233 @@
 package gocolorize
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 )
 
-//A list of the basic unix shell colors
-const reset = "\033[0m"
-
-type FgColor string
+//internal usage
+var plain = false
 
 const (
-	FgNone        FgColor = ""
-	FgBold        FgColor = "\033[1m"
-	FgBlack       FgColor = "\033[0;30m"
-	FgRed         FgColor = "\033[0;31m"
-	FgGreen       FgColor = "\033[0;32m"
-	FgYellow      FgColor = "\033[0;33m"
-	FgBlue        FgColor = "\033[0;34m"
-	FgMagenta     FgColor = "\033[0;35m"
-	FgCyan        FgColor = "\033[0;36m"
-	FgLightGray   FgColor = "\033[0;37m"
-	FgGray        FgColor = "\033[1;30m"
-	FgBoldRed     FgColor = "\033[1;31m"
-	FgBoldGreen   FgColor = "\033[1;32m"
-	FgBoldYellow  FgColor = "\033[1;33m"
-	FgBoldBlue    FgColor = "\033[1;34m"
-	FgBoldMagenta FgColor = "\033[1;35m"
-	FgBoldCyan    FgColor = "\033[1;36m"
-	FgWhite       FgColor = "\033[1;37m"
+	start             = "\033["
+	reset             = "\033[0m"
+	bold              = "1;"
+	blink             = "5;"
+	underline         = "4;"
+	inverse           = "7;"
+	normalIntensityFg = 30
+	highIntensityFg   = 90
+	normalIntensityBg = 40
+	highIntensityBg   = 100
 )
 
-type BgColor string
+//The rest is external facing
+
+//Color can be used for Fg and Bg
+type Color int
 
 const (
-	BgNone    BgColor = ""
-	BgBlack   BgColor = "\033[40m"
-	BgRed     BgColor = "\033[41m"
-	BgGreen   BgColor = "\033[42m"
-	BgYellow  BgColor = "\033[43m"
-	BgBlue    BgColor = "\033[44m"
-	BgMagenta BgColor = "\033[45m"
-	BgCyan    BgColor = "\033[46m"
-	BgWhite   BgColor = "\033[47m"
+	ColorNone = iota
+	//placeholder here so we don't confuse with ColorNone
+	Black   Color = -1
+	Red     Color = 1
+	Green   Color = 2
+	Yellow  Color = 3
+	Blue    Color = 4
+	Magenta Color = 5
+	Cyan    Color = 6
+	White   Color = 7
 )
 
+var colors = map[string]Color{
+	"black":   Black,
+	"red":     Red,
+	"green":   Green,
+	"yellow":  Yellow,
+	"blue":    Blue,
+	"magenta": Magenta,
+	"cyan":    Cyan,
+	"white":   White,
+}
+
+//Can set 1 or more of these properties
+//This struct holds the state
+type Property struct {
+	Bold      bool
+	Blink     bool
+	Underline bool
+	Inverse   bool
+	Fgi       bool
+	Bgi       bool
+}
+
+//Where the magic happens
 type Colorize struct {
 	Value []interface{}
-	FgColor
-	BgColor
+	Fg    Color
+	Bg    Color
+	Prop  Property
 }
 
-func (c Colorize) Paint(v ...interface{}) Colorize {
-	return Colorize{Value: v, FgColor: c.FgColor, BgColor: c.BgColor}
+//returns a value you can stick into print, of type string
+func (c Colorize) Paint(v ...interface{}) string {
+	c.Value = v
+	return fmt.Sprint(c)
 }
 
-func (c Colorize) PaintString(v ...interface{}) string {
-	r := Colorize{Value: v, FgColor: c.FgColor, BgColor: c.BgColor}
-	return fmt.Sprint(r)
+func propsString(p Property) string {
+	var result string
+	if p.Bold {
+		result += bold
+	}
+	if p.Blink {
+		result += blink
+	}
+	if p.Underline {
+		result += underline
+	}
+	if p.Inverse {
+		result += inverse
+	}
+	return result
 }
 
 // Format allows ColorText to satisfy the fmt.Formatter interface. The format
 // behaviour is the same as for fmt.Print.
 func (ct Colorize) Format(fs fmt.State, c rune) {
-	fmt.Fprint(fs, ct.FgColor)
-	fmt.Fprint(fs, ct.BgColor)
-	w, wOk := fs.Width()
-	p, pOk := fs.Precision()
-	var b bytes.Buffer
-	for i, _ := range ct.Value {
-		b.WriteByte('%')
-		for _, f := range "+-# 0" {
-			if fs.Flag(int(f)) {
-				b.WriteRune(f)
-			}
+	var base int
+	//fmt.Println(ct.Fg, ct.Fgi, ct.Bg, ct.Bgi, ct.Prop)
+	//First Handle the Fg styles and options
+	if ct.Fg != ColorNone && !plain {
+		if ct.Prop.Fgi {
+			base = int(highIntensityFg)
+		} else {
+			base = int(normalIntensityFg)
 		}
-		if wOk {
-			fmt.Fprint(&b, w)
+		if ct.Fg == Black {
+			base = base
+		} else {
+			base = base + int(ct.Fg)
 		}
-		if pOk {
-			b.WriteByte('.')
-			fmt.Fprint(&b, p)
+		fmt.Fprint(fs, start, "0;", propsString(ct.Prop), base, "m")
+	}
+	//Next Handle the Bg styles and options
+	if ct.Bg != ColorNone && !plain {
+		if ct.Prop.Bgi {
+			base = int(highIntensityBg)
+		} else {
+			base = int(normalIntensityBg)
 		}
-		b.WriteRune(c)
-		if i < len(ct.Value)-1 {
-			b.WriteByte(' ')
+		if ct.Bg == Black {
+			base = base
+		} else {
+			base = base + int(ct.Bg)
+		}
+		//We still want to honor props if only the background is set
+		if ct.Fg == ColorNone {
+			fmt.Fprint(fs, start, propsString(ct.Prop), base, "m")
+			//fmt.Fprint(fs, start, base, "m")
+		} else {
+			fmt.Fprint(fs, start, base, "m")
 		}
 	}
-	fmt.Fprintf(fs, b.String(), ct.Value...)
-	fmt.Fprint(fs, reset)
+
+	// I simplified this to be a bit less efficient,
+	// but more robust, it will work with anything that
+	// printf("%v") will support
+	for i, v := range ct.Value {
+		fmt.Fprintf(fs, fmt.Sprint(v))
+		if i < len(ct.Value)-1 {
+			fmt.Fprintf(fs, " ")
+		}
+	}
+
+	//after we finish go back to a clean state
+	if !plain {
+		fmt.Fprint(fs, reset)
+	}
 }
 
-func (C *Colorize) SetColor(c FgColor) {
-	C.FgColor = c
+func NewColor(style string) Colorize {
+	//Thank you https://github.com/mgutz/ansi for
+	//this code example and for a bunch of other ideas
+	foreground_background := strings.Split(style, ":")
+	foreground := strings.Split(foreground_background[0], "+")
+	fg := colors[foreground[0]]
+	fgStyle := ""
+	if len(foreground) > 1 {
+		fgStyle = foreground[1]
+	}
+
+    var bg Color
+	bgStyle := ""
+	if len(foreground_background) > 1 {
+		background := strings.Split(foreground_background[1], "+")
+		bg = colors[background[0]]
+		if len(background) > 1 {
+			bgStyle = background[1]
+		}
+	}
+
+	c := Colorize{Fg: fg, Bg: bg}
+	if len(fgStyle) > 0 {
+		if strings.Contains(fgStyle, "b") {
+			c.ToggleBold()
+		}
+		if strings.Contains(fgStyle, "B") {
+			c.ToggleBlink()
+		}
+		if strings.Contains(fgStyle, "u") {
+			c.ToggleUnderline()
+		}
+		if strings.Contains(fgStyle, "i") {
+			c.ToggleInverse()
+		}
+		if strings.Contains(fgStyle, "h") {
+			c.ToggleFgIntensity()
+		}
+	}
+
+    if len(bgStyle) > 0{
+		if strings.Contains(bgStyle, "h") {
+            c.ToggleBgIntensity()
+		}
+    }
+	return c
 }
 
-func (C *Colorize) SetBgColor(b BgColor) {
-	C.BgColor = b
+func (C *Colorize) SetColor(c Color) {
+	C.Fg = c
+}
+
+func (C *Colorize) SetBgColor(b Color) {
+	C.Bg = b
+}
+
+func (C *Colorize) ToggleFgIntensity() {
+	C.Prop.Fgi = !C.Prop.Fgi
+}
+
+func (C *Colorize) ToggleBgIntensity() {
+	C.Prop.Bgi = !C.Prop.Bgi
+}
+
+func (C *Colorize) ToggleBold() {
+	C.Prop.Bold = !C.Prop.Bold
+}
+
+func (C *Colorize) ToggleBlink() {
+	C.Prop.Blink = !C.Prop.Blink
+}
+
+func (C *Colorize) ToggleUnderline() {
+	C.Prop.Underline = !C.Prop.Underline
+}
+
+func (C *Colorize) ToggleInverse() {
+	C.Prop.Inverse = !C.Prop.Inverse
+}
+
+func TogglePlain() {
+	plain = !plain
 }

@@ -4,27 +4,26 @@ package main
 import (
 	"fmt"
 	"github.com/agtorre/gocolorize"
-	"github.com/agtorre/gocolorize/paints"
 )
 
 func main() {
 	// one way to define a stateful colorizer
 	var green gocolorize.Colorize
-	green.SetColor(gocolorize.FgGreen)
+	green.SetColor(gocolorize.Green)
 	g := green.Paint
 
 	// Another way to do it
-	red := gocolorize.Colorize{FgColor: gocolorize.FgRed}
+	red := gocolorize.Colorize{Fg: gocolorize.Red}
 	r := red.Paint
 
-	//Some tips for using a generic stateless colorizer
-	b := paints.PaintBlue
+    // now with string construction
+    green_black := gocolorize.Colorize{Fg: gocolorize.Blue}
+    // toggle attributes
+    green_black.ToggleUnderline()
+    b := green_black.Paint
 
-	//lets checkout out an advanced one
-	//this could also be chained like this, but it's a lot less efficient:
-	//paints.PaintBgBlack(paints.PaintFgBlack("What we want to print"))
-	//in our case though, we'll use a stateful version
-	c := gocolorize.Colorize{FgColor: gocolorize.FgWhite, BgColor: gocolorize.BgBlack}.Paint
+    //all in 1 line
+    c := gocolorize.NewColor("yellow:black").Paint
 
 	//r := gocolorize.COLOR_RED
 
