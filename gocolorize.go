@@ -228,6 +228,6 @@ func (C *Colorize) ToggleInverse() {
 	C.Prop.Inverse = !C.Prop.Inverse
 }
 
-func TogglePlain() {
-	plain = !plain
+func SetPlain(p bool) {
+	plain = p
 }

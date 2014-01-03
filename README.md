@@ -72,7 +72,7 @@ Object Properties:
     //To disable or renable everything color (for example on Windows)
     //the other functions will still work, they'll just return plain
     //text for portability
-    gocolorize.TogglePlain()
+    gocolorize.SetPlain(true)
 ```
 
 ##NewColor String Format
@@ -115,7 +115,7 @@ Tests are another good place to see examples. In order to run tests:
 ANSI coloring will not work in default Windows environments and may not work in other environments correctly. In order to allow compatibility with these environments, you can call:
 
 ```go
-gocolorize.TogglePlain()
+gocolorize.SetPlain(true)
 ```
 
 Once toggled, the library will still function, but it will not color the output.

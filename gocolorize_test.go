@@ -116,8 +116,8 @@ func TestToggle(t *testing.T) {
 		fmt.Printf("Success: string: '%s' matches '%s'\n", out_string, basis_string)
 	}
 }
-func TestNewAllToggle(t *testing.T){
-    n:= NewColor("yellow+bBuih:black+h")
+func TestNewAllToggle(t *testing.T) {
+	n := NewColor("yellow+bBuih:black+h")
 	out_string := n.Paint("all toggles in 1 line!")
 	basis_string := "\033[0;1;5;4;7;93m\033[100mall toggles in 1 line!\033[0m"
 	if out_string != basis_string {
@@ -127,17 +127,15 @@ func TestNewAllToggle(t *testing.T){
 	}
 }
 
-
-func TestPlain(t *testing.T){
-    plain := Colorize{Fg: Magenta}
-    TogglePlain()
-	out_string :=plain.Paint("plain", "text")
+func TestPlain(t *testing.T) {
+	plain := Colorize{Fg: Magenta}
+	SetPlain(true)
+	out_string := plain.Paint("plain", "text")
 	basis_string := "plain text"
 	if out_string != basis_string {
 		t.Errorf("Error: string '%s' does not match '%s'\n", out_string, basis_string)
 	} else {
 		fmt.Printf("Success: string: '%s' matches '%s'\n", out_string, basis_string)
 	}
-    TogglePlain()
+	SetPlain(false)
 }
-
