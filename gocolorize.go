@@ -159,7 +159,7 @@ func NewColor(style string) Colorize {
 		fgStyle = foreground[1]
 	}
 
-    var bg Color
+	var bg Color
 	bgStyle := ""
 	if len(foreground_background) > 1 {
 		background := strings.Split(foreground_background[1], "+")
@@ -188,11 +188,11 @@ func NewColor(style string) Colorize {
 		}
 	}
 
-    if len(bgStyle) > 0{
+	if len(bgStyle) > 0 {
 		if strings.Contains(bgStyle, "h") {
-            c.ToggleBgIntensity()
+			c.ToggleBgIntensity()
 		}
-    }
+	}
 	return c
 }
 
