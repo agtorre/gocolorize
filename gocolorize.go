@@ -29,14 +29,14 @@ type Color int
 const (
 	ColorNone = iota
 	//placeholder here so we don't confuse with ColorNone
-	Black   Color = -1
-	Red     Color = 1
-	Green   Color = 2
-	Yellow  Color = 3
-	Blue    Color = 4
-	Magenta Color = 5
-	Cyan    Color = 6
-	White   Color = 7
+	Red
+	Green
+	Yellow
+	Blue
+	Magenta
+	Cyan
+	White
+	Black Color = -1
 )
 
 var colors = map[string]Color{
