@@ -40,7 +40,6 @@ const (
 )
 
 var colors = map[string]Color{
-	"black":   Black,
 	"red":     Red,
 	"green":   Green,
 	"yellow":  Yellow,
@@ -48,6 +47,7 @@ var colors = map[string]Color{
 	"magenta": Magenta,
 	"cyan":    Cyan,
 	"white":   White,
+	"black":   Black,
 }
 
 //Can set 1 or more of these properties
