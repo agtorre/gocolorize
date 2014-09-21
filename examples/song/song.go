@@ -16,16 +16,15 @@ func main() {
 	red := gocolorize.Colorize{Fg: gocolorize.Red}
 	r := red.Paint
 
-    // now with string construction
-    green_black := gocolorize.Colorize{Fg: gocolorize.Blue}
-    // toggle attributes
-    green_black.ToggleUnderline()
-    b := green_black.Paint
+	// now with string construction
+	green_black := gocolorize.Colorize{Fg: gocolorize.Blue}
 
-    //all in 1 line
-    c := gocolorize.NewColor("yellow:black").Paint
+	// toggle attributes
+	green_black.ToggleUnderline()
+	b := green_black.Paint
 
-	//r := gocolorize.COLOR_RED
+	//all in 1 line
+	c := gocolorize.NewColor("yellow:black").Paint
 
 	fmt.Println(b("On the twelfth day of Christmas"))
 	fmt.Println(b("my true love sent to me:"))

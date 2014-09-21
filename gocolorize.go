@@ -29,18 +29,17 @@ type Color int
 const (
 	ColorNone = iota
 	//placeholder here so we don't confuse with ColorNone
-	Black   Color = -1
-	Red     Color = 1
-	Green   Color = 2
-	Yellow  Color = 3
-	Blue    Color = 4
-	Magenta Color = 5
-	Cyan    Color = 6
-	White   Color = 7
+	Red
+	Green
+	Yellow
+	Blue
+	Magenta
+	Cyan
+	White
+	Black Color = -1
 )
 
 var colors = map[string]Color{
-	"black":   Black,
 	"red":     Red,
 	"green":   Green,
 	"yellow":  Yellow,
@@ -48,6 +47,7 @@ var colors = map[string]Color{
 	"magenta": Magenta,
 	"cyan":    Cyan,
 	"white":   White,
+	"black":   Black,
 }
 
 //Can set 1 or more of these properties
@@ -159,7 +159,7 @@ func NewColor(style string) Colorize {
 		fgStyle = foreground[1]
 	}
 
-    var bg Color
+	var bg Color
 	bgStyle := ""
 	if len(foreground_background) > 1 {
 		background := strings.Split(foreground_background[1], "+")
@@ -188,11 +188,11 @@ func NewColor(style string) Colorize {
 		}
 	}
 
-    if len(bgStyle) > 0{
+	if len(bgStyle) > 0 {
 		if strings.Contains(bgStyle, "h") {
-            c.ToggleBgIntensity()
+			c.ToggleBgIntensity()
 		}
-    }
+	}
 	return c
 }
 
