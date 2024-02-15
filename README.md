@@ -1,6 +1,6 @@
 
 
-#Gocolorize
+# Gocolorize
 Gocolorize is a package that allows Go programs to provide ANSI coloring in a stateful manner. Gocolorize is ideal for logging or cli applications.
 
 ![colored tests passing](https://raw.github.com/agtorre/gocolorize/master/screenshot/tests.png)
@@ -8,7 +8,7 @@ Gocolorize is a package that allows Go programs to provide ANSI coloring in a st
 [![wercker status](https://app.wercker.com/status/ee73c1abee9900c475def6ff9a142237/s "wercker status")](https://app.wercker.com/project/bykey/ee73c1abee9900c475def6ff9a142237)
 
 
-##Features
+## Features
 - Stateful ANSI coloring 
 - Supports Foreground and background colors
 - Supports a nuber of text properties such as bold or underline
@@ -19,12 +19,12 @@ Gocolorize is a package that allows Go programs to provide ANSI coloring in a st
 - Disable ability for portability
 
 
-##Install Gocolorize
+## Install Gocolorize
 To install:
 
     $ go get github.com/agtorre/gocolorize
 
-##Usage
+## Usage
 Ways to initialize a Colorize object:
 ```go
     //It can be done like this
@@ -80,7 +80,7 @@ Object Properties:
     gocolorize.SetPlain(true)
 ```
 
-##NewColor String Format
+## NewColor String Format
 ```go    
 "foregroundColor+attributes:backgroundColor+attributes"
 ```
@@ -103,7 +103,7 @@ Attributes:
 * i = inverse
 
 
-##Examples
+## Examples
 See examples directory for examples:
 
     $ cd examples/
@@ -111,12 +111,12 @@ See examples directory for examples:
     $ go run logging.go
     
 
-##Tests
+## Tests
 Tests are another good place to see examples. In order to run tests:
 
     $ go test -cover
 
-##Portability
+## Portability
 ANSI coloring will not work in default Windows environments and may not work in other environments correctly. In order to allow compatibility with these environments, you can call:
 
 ```go
